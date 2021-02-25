@@ -5,11 +5,12 @@
         <RootNamespace>SmartBillApi</RootNamespace>
         <AssemblyName>SmartBillApi</AssemblyName>
         <PackageId>SmartBillApi</PackageId>
-        <Version>0.0.1-alpha-5</Version>
+        <Version>0.0.1-alpha-6</Version>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Authors>TDR</Authors>
         <Company>TDR</Company>
         <Title>SmartBill Api Client</Title>
+        <RepositoryUrl>https://github.com/DenisTDR/SmartBillApi</RepositoryUrl>
         <Description>OpenSource SmartBill Api Client implementation in C#</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>9</LangVersion>
