@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading.Tasks;
 using RestSharp;
 using SmartBillApi.Extensions;
@@ -73,24 +74,30 @@ namespace SmartBillApi
             //return this._sbcRestClient.Execute((IRestRequest) restRequest).Message;
         }
 
-        public string CreateEstimate(Estimate estimate)
+        public async Task<string> CreateEstimate(Estimate estimate)
         {
-            throw new NotImplementedException();
-            // SbcResponse sbcResponse = this._sbcRestClient.Execute((IRestRequest) this._sbcRestClient.CreatePostRequest<Estimate>(nameof (estimate), estimate.ToEstimate()));
-            // estimate.Number = sbcResponse.Number;
-            // return sbcResponse.Number;
+            var request = new RestRequest("estimate", Method.POST) {JsonSerializer = new NewtonsoftJsonSerializer()};
+            request.AddJsonBody(estimate);
+            var resp = await _restClient.Response<NoCustomResponse>(request);
+            return resp.Number;
         }
 
-        public byte[] GetEstimatePdf(string cif, string seriesName, string number)
+        public Stream GetEstimatePdf(string cif, string seriesName, string number)
         {
-            throw new NotImplementedException();
-            // RestRequest request = new RestRequest("estimate/pdf?cif={cif}&seriesname={seriesName}&number={number}",
-            // (Method) 0);
-            // request.AddUrlSegment(nameof(cif), cif);
-            // request.AddUrlSegment(nameof(seriesName), seriesName);
-            // request.AddUrlSegment(nameof(number), number);
-            // request.AddHeader("Accept", "application/octet-stream");
-            //return this._sbcRestClient.DownloadData(request);
+            var request = new RestRequest("estimate/pdf")
+                .AddQueryParameter(nameof(cif), cif)
+                .AddQueryParameter("seriesname", seriesName)
+                .AddQueryParameter(nameof(number), number)
+                .AddHeader("Accept", "application/octet-stream");
+            var memoryStream = new MemoryStream();
+            request.AdvancedResponseWriter = (stream, httpResponse) =>
+            {
+                stream.CopyTo(memoryStream);
+                stream.Dispose();
+            };
+            _restClient.Client.DownloadData(request);
+            memoryStream.Position = 0;
+            return memoryStream;
         }
 
         public string DeleteEstimate(string cif, string seriesName, string number)
@@ -235,7 +242,7 @@ namespace SmartBillApi
             string productCode = null)
         {
             if (string.IsNullOrEmpty(cif)) throw new ArgumentNullException(nameof(cif));
-            var request = new RestRequest("stocks", (Method) 0)
+            var request = new RestRequest("stocks", Method.GET)
                 .AddQueryParameter(nameof(cif), cif)
                 .AddQueryParameter(nameof(date), date.ToSmartBillString())
                 .AddOptionalQueryParameter(nameof(warehouseName), warehouseName)

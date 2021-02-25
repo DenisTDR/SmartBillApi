@@ -11,7 +11,7 @@ namespace SmartBillApi.Rest
 {
     internal class SmartBillRestClient
     {
-        private RestClient Client { get; }
+        public RestClient Client { get; }
 
         public SmartBillRestClient([NotNull] string username, [NotNull] string token,
             [NotNull] string baseUrl = "https://ws.smartbill.ro/SBORO/api/")
@@ -26,11 +26,19 @@ namespace SmartBillApi.Rest
         internal async Task<JResponseModel> Response(IRestRequest request)
         {
             var rr = await Client.ExecuteAsync(request);
-            return new JResponseModel
+            try
             {
-                Data = JsonConvert.DeserializeObject<JToken>(rr.Content),
-                StatusCode = rr.StatusCode
-            };
+                var jsonParsedContent = JsonConvert.DeserializeObject<JToken>(rr.Content);
+                return new JResponseModel
+                {
+                    Data = jsonParsedContent,
+                    StatusCode = rr.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message + "\nResponse: " + rr.Content);
+            }
         }
 
         public async Task<SmartBillResponse<T>> Response<T>(IRestRequest request) where T : class, new()
@@ -52,16 +60,19 @@ namespace SmartBillApi.Rest
                 result.Data = jObjR.Data.ToObject<T>();
             }
 
-            var path = fieldPathAttr.FieldPath.Split("/");
             var obj = jObjR.Data;
-            foreach (var t in path)
+            if (fieldPathAttr.FieldPath != null)
             {
-                if (!(obj is JObject jObj) || !jObj.TryGetValue(t, out var token))
+                var path = fieldPathAttr.FieldPath.Split("/");
+                foreach (var t in path)
                 {
-                    throw new Exception($"Couldn't find path: '{fieldPathAttr.FieldPath}' in response.");
-                }
+                    if (!(obj is JObject jObj) || !jObj.TryGetValue(t, out var token))
+                    {
+                        throw new Exception($"Couldn't find path: '{fieldPathAttr.FieldPath}' in response.");
+                    }
 
-                obj = token;
+                    obj = token;
+                }
             }
 
             result.Data = obj?.ToObject<T>();
