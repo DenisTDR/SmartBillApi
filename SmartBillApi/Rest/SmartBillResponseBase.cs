@@ -6,5 +6,6 @@ namespace SmartBillApi.Rest
         public string Message { get; set; }
         public string Number { get; set; }
         public string Series { get; set; }
+        public bool? Successfully { get; set; }
     }
 }

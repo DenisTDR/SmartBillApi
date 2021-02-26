@@ -21,24 +21,35 @@ namespace SmartBillApi
         public SmartBillApiClient([NotNull] string baseUrl, [NotNull] string username, [NotNull] string token) =>
             _restClient = new SmartBillRestClient(username, token, baseUrl);
 
-        public string CreateInvoice(Invoice invoice)
+        public async Task<string> CreateInvoice(Invoice invoice)
         {
-            throw new NotImplementedException();
-            // SbcResponse sbcResponse = this._sbcRestClient.Execute((IRestRequest) this._sbcRestClient.CreatePostRequest<Invoice>(nameof (invoice), invoice.ToInvoice()));
-            // invoice.Number = sbcResponse.Number;
-            // return sbcResponse.Number;
+            var request = new RestRequest("invoice", Method.POST) {JsonSerializer = new NewtonsoftJsonSerializer()};
+            request.AddJsonBody(invoice);
+            var resp = await _restClient.Response<NoCustomResponse>(request);
+            if (string.IsNullOrEmpty(resp.Number) && !invoice.IsDraft)
+            {
+                throw new Exception(resp.ErrorText);
+            }
+
+            return resp.Number;
         }
 
-        public byte[] GetInvoicePdf(string cif, string seriesName, string number)
+        public Stream GetInvoicePdf(string cif, string seriesName, string number)
         {
-            throw new NotImplementedException();
-            // RestRequest request = new RestRequest("invoice/pdf?cif={cif}&seriesname={seriesName}&number={number}",
-            // (Method) 0);
-            // request.AddUrlSegment(nameof(cif), cif);
-            // request.AddUrlSegment(nameof(seriesName), seriesName);
-            // request.AddUrlSegment(nameof(number), number);
-            // request.AddHeader("Accept", "application/octet-stream");
-            //return this._sbcRestClient.DownloadData(request);
+            var request = new RestRequest("invoice/pdf")
+                .AddQueryParameter(nameof(cif), cif)
+                .AddQueryParameter("seriesname", seriesName)
+                .AddQueryParameter(nameof(number), number)
+                .AddHeader("Accept", "application/octet-stream");
+            var memoryStream = new MemoryStream();
+            request.AdvancedResponseWriter = (stream, httpResponse) =>
+            {
+                stream.CopyTo(memoryStream);
+                stream.Dispose();
+            };
+            _restClient.Client.DownloadData(request);
+            memoryStream.Position = 0;
+            return memoryStream;
         }
 
         public string DeleteInvoice(string cif, string seriesName, string number)
@@ -79,6 +90,11 @@ namespace SmartBillApi
             var request = new RestRequest("estimate", Method.POST) {JsonSerializer = new NewtonsoftJsonSerializer()};
             request.AddJsonBody(estimate);
             var resp = await _restClient.Response<NoCustomResponse>(request);
+            if (string.IsNullOrEmpty(resp.Number))
+            {
+                throw new Exception(resp.ErrorText);
+            }
+
             return resp.Number;
         }
 
@@ -100,15 +116,14 @@ namespace SmartBillApi
             return memoryStream;
         }
 
-        public string DeleteEstimate(string cif, string seriesName, string number)
+        public async Task<string> DeleteEstimate(string cif, string seriesName, string number)
         {
-            throw new NotImplementedException();
-            // RestRequest restRequest =
-            // new RestRequest("estimate?cif={cif}&seriesname={seriesName}&number={number}", (Method) 3);
-            // restRequest.AddUrlSegment(nameof(cif), cif);
-            // restRequest.AddUrlSegment(nameof(seriesName), seriesName);
-            // restRequest.AddUrlSegment(nameof(number), number);
-            //return this._sbcRestClient.Execute((IRestRequest) restRequest).Message;
+            var request = new RestRequest("estimate", Method.DELETE)
+                .AddQueryParameter(nameof(cif), cif)
+                .AddQueryParameter("seriesname", seriesName)
+                .AddQueryParameter(nameof(number), number);
+            var resp = await _restClient.Response<NoCustomResponse>(request);
+            return resp.Message;
         }
 
         public string CancelEstimate(string cif, string seriesName, string number)

@@ -10,7 +10,7 @@ namespace SmartBillApi.ServiceTypes
 
         Stream GetEstimatePdf(string cif, string seriesName, string number);
 
-        string DeleteEstimate(string cif, string seriesName, string number);
+        Task<string> DeleteEstimate(string cif, string seriesName, string number);
 
         string CancelEstimate(string cif, string seriesName, string number);
 

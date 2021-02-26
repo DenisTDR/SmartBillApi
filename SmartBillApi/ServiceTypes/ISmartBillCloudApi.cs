@@ -1,13 +1,12 @@
-﻿
-namespace SmartBillApi.ServiceTypes
+﻿namespace SmartBillApi.ServiceTypes
 {
-  public interface ISmartBillCloudApi : 
-    IInvoiceService,
-    IEstimateService,
-    IPaymentService,
-    IConfigService,
-    IEmailService,
-    IStockService
-  {
-  }
+    public interface ISmartBillCloudApi :
+        IInvoiceService,
+        IEstimateService,
+        IPaymentService,
+        IConfigService,
+        IEmailService,
+        IStockService
+    {
+    }
 }
