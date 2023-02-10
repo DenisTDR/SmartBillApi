@@ -5,7 +5,7 @@
         <RootNamespace>SmartBillApi</RootNamespace>
         <AssemblyName>SmartBillApi</AssemblyName>
         <PackageId>SmartBillApi</PackageId>
-        <Version>0.0.1-alpha-7</Version>
+        <Version>0.0.1-alpha-9</Version>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Authors>TDR</Authors>
         <Company>TDR</Company>
@@ -18,11 +18,16 @@
         <IsPackable>true</IsPackable>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="RestSharp" Version="106.11.7" />
+        <None Include="../README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="RestSharp" Version="108.0.3" />
+        <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="108.0.3" />
     </ItemGroup>
 
 </Project>

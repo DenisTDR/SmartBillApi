@@ -23,7 +23,7 @@ namespace SmartBillApi
 
         public async Task<string> CreateInvoice(Invoice invoice)
         {
-            var request = new RestRequest("invoice", Method.POST) {JsonSerializer = new NewtonsoftJsonSerializer()};
+            var request = new RestRequest("invoice", Method.Post);
             request.AddJsonBody(invoice);
             var resp = await _restClient.Response<NoCustomResponse>(request);
             if (string.IsNullOrEmpty(resp.Number) && !invoice.IsDraft)
@@ -34,22 +34,15 @@ namespace SmartBillApi
             return resp.Number;
         }
 
-        public Stream GetInvoicePdf(string cif, string seriesName, string number)
+        public Task<Stream> GetInvoicePdf(string cif, string seriesName, string number)
         {
             var request = new RestRequest("invoice/pdf")
                 .AddQueryParameter(nameof(cif), cif)
                 .AddQueryParameter("seriesname", seriesName)
                 .AddQueryParameter(nameof(number), number)
                 .AddHeader("Accept", "application/octet-stream");
-            var memoryStream = new MemoryStream();
-            request.AdvancedResponseWriter = (stream, httpResponse) =>
-            {
-                stream.CopyTo(memoryStream);
-                stream.Dispose();
-            };
-            _restClient.Client.DownloadData(request);
-            memoryStream.Position = 0;
-            return memoryStream;
+
+            return _restClient.Client.DownloadStreamAsync(request);
         }
 
         public string DeleteInvoice(string cif, string seriesName, string number)
@@ -87,7 +80,7 @@ namespace SmartBillApi
 
         public async Task<string> CreateEstimate(Estimate estimate)
         {
-            var request = new RestRequest("estimate", Method.POST) {JsonSerializer = new NewtonsoftJsonSerializer()};
+            var request = new RestRequest("estimate", Method.Post);
             request.AddJsonBody(estimate);
             var resp = await _restClient.Response<NoCustomResponse>(request);
             if (string.IsNullOrEmpty(resp.Number))
@@ -98,27 +91,20 @@ namespace SmartBillApi
             return resp.Number;
         }
 
-        public Stream GetEstimatePdf(string cif, string seriesName, string number)
+        public Task<Stream> GetEstimatePdf(string cif, string seriesName, string number)
         {
             var request = new RestRequest("estimate/pdf")
                 .AddQueryParameter(nameof(cif), cif)
                 .AddQueryParameter("seriesname", seriesName)
                 .AddQueryParameter(nameof(number), number)
                 .AddHeader("Accept", "application/octet-stream");
-            var memoryStream = new MemoryStream();
-            request.AdvancedResponseWriter = (stream, httpResponse) =>
-            {
-                stream.CopyTo(memoryStream);
-                stream.Dispose();
-            };
-            _restClient.Client.DownloadData(request);
-            memoryStream.Position = 0;
-            return memoryStream;
+
+            return _restClient.Client.DownloadStreamAsync(request);
         }
 
         public async Task<string> DeleteEstimate(string cif, string seriesName, string number)
         {
-            var request = new RestRequest("estimate", Method.DELETE)
+            var request = new RestRequest("estimate", Method.Delete)
                 .AddQueryParameter(nameof(cif), cif)
                 .AddQueryParameter("seriesname", seriesName)
                 .AddQueryParameter(nameof(number), number);
@@ -257,7 +243,7 @@ namespace SmartBillApi
             string productCode = null)
         {
             if (string.IsNullOrEmpty(cif)) throw new ArgumentNullException(nameof(cif));
-            var request = new RestRequest("stocks", Method.GET)
+            var request = new RestRequest("stocks")
                 .AddQueryParameter(nameof(cif), cif)
                 .AddQueryParameter(nameof(date), date.ToSmartBillString())
                 .AddOptionalQueryParameter(nameof(warehouseName), warehouseName)

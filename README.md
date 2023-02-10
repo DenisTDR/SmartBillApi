@@ -8,4 +8,4 @@ the ['Official' not maintained anymore library](https://www.nuget.org/packages/S
 There are only a few methods implemented. Feel free to implement any method you need and make a pull request.
 
 Available as [Nuget Package](https://www.nuget.org/packages/SmartBillApi/). It is unlisted as there are too many methods
-implemented.
+not implemented.

@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Serializers.NewtonsoftJson;
 
 namespace SmartBillApi.Rest
 {
@@ -20,10 +21,11 @@ namespace SmartBillApi.Rest
             if (string.IsNullOrEmpty(token)) throw new ArgumentNullException(nameof(token));
             if (string.IsNullOrEmpty(baseUrl)) throw new ArgumentNullException(nameof(baseUrl));
 
-            Client = new RestClient(baseUrl) {Authenticator = new HttpBasicAuthenticator(username, token)};
+            Client = new RestClient(baseUrl) { Authenticator = new HttpBasicAuthenticator(username, token) };
+            Client.UseNewtonsoftJson();
         }
 
-        internal async Task<JResponseModel> Response(IRestRequest request)
+        internal async Task<JResponseModel> Response(RestRequest request)
         {
             var rr = await Client.ExecuteAsync(request);
             try
@@ -41,7 +43,7 @@ namespace SmartBillApi.Rest
             }
         }
 
-        public async Task<SmartBillResponse<T>> Response<T>(IRestRequest request) where T : class, new()
+        public async Task<SmartBillResponse<T>> Response<T>(RestRequest request) where T : class, new()
         {
             var jObjR = await Response(request);
             var fieldPathAttr = Utils.GetResponseFieldPathFromType<T>();
@@ -80,10 +82,10 @@ namespace SmartBillApi.Rest
             return result;
         }
 
-        public Task<SmartBillResponse<T>> Response<T>(string url) where T : class, new()
-        {
-            var request = new RestRequest(url, DataFormat.Json);
-            return Response<T>(request);
-        }
+        // public Task<SmartBillResponse<T>> Response<T>(string url) where T : class, new()
+        // {
+            // var request = new RestRequest(url, Method.Get, DataFormat.Json);
+            // return Response<T>(request);
+        // }
     }
 }

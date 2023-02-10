@@ -8,7 +8,7 @@ namespace SmartBillApi.ServiceTypes
     {
         Task<string> CreateEstimate(Estimate estimate);
 
-        Stream GetEstimatePdf(string cif, string seriesName, string number);
+        Task<Stream> GetEstimatePdf(string cif, string seriesName, string number);
 
         Task<string> DeleteEstimate(string cif, string seriesName, string number);
 

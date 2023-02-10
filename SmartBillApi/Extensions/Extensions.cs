@@ -9,7 +9,7 @@ namespace SmartBillApi.Extensions
 
         internal static string ToSmartBillString(this DateTime? dateTime) => dateTime?.ToSmartBillString();
 
-        internal static IRestRequest AddOptionalQueryParameter(this IRestRequest request, string name, string value)
+        internal static RestRequest AddOptionalQueryParameter(this RestRequest request, string name, string value)
         {
             return value == null ? request : request.AddQueryParameter(name, value);
         }

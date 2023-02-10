@@ -8,7 +8,7 @@ namespace SmartBillApi.ServiceTypes
     {
         Task<string> CreateInvoice(Invoice invoice);
 
-        Stream GetInvoicePdf(string cif, string seriesName, string number);
+        Task<Stream> GetInvoicePdf(string cif, string seriesName, string number);
 
         string DeleteInvoice(string cif, string seriesName, string number);
 
